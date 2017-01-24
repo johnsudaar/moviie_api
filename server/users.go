@@ -83,3 +83,23 @@ func SearchUser(r *http.Request) (int, string) {
 	encoder.Encode(users)
 	return 200, res.String()
 }
+
+func FindByApiKey(r *http.Request) (int, string) {
+	apiKey := r.URL.Query().Get("api_key")
+	user, err := models.FindUserByApiKey(apiKey)
+	if err != nil {
+		return 500, err.Error()
+	}
+
+	if user == nil {
+		return 400, "Invalid API KEY"
+	}
+
+	user.ApiKey = "[REDACTED]"
+	user.Movies = nil
+
+	var res bytes.Buffer
+	encoder := json.NewEncoder(&res)
+	encoder.Encode(user)
+	return 200, res.String()
+}
